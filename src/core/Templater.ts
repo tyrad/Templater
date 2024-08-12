@@ -4,23 +4,24 @@ import {
     normalizePath,
     TAbstractFile,
     TFile,
-    TFolder,
+    TFolder
 } from "obsidian";
 import {
     delay,
     generate_dynamic_command_regex,
     get_active_file,
     get_folder_path_from_file_path,
-    resolve_tfile,
+    resolve_tfile
 } from "utils/Utils";
 import TemplaterPlugin from "main";
 import {
     FunctionsGenerator,
-    FunctionsMode,
+    FunctionsMode
 } from "./functions/FunctionsGenerator";
 import { errorWrapper, errorWrapperSync, TemplaterError } from "utils/Error";
 import { Parser } from "./parser/Parser";
 import { log_error } from "utils/Log";
+import { readdirSync } from "fs";
 
 export enum RunMode {
     CreateNewFromTemplate,
@@ -69,7 +70,7 @@ export class Templater {
             template_file: template_file,
             target_file: target_file,
             run_mode: run_mode,
-            active_file: active_file,
+            active_file: active_file
         };
     }
 
@@ -140,8 +141,27 @@ export class Templater {
             template instanceof TFile ? template.extension || "md" : "md";
         const created_note = await errorWrapper(async () => {
             const folderPath = folder instanceof TFolder ? folder.path : folder;
+            // ... 读取文件目录
+            let sortOrder = "";
+            if (folderPath) {
+                const workspace = app.vault.adapter.basePath;
+                //@ts-ignore
+                const ffs = readdirSync(workspace + "/" + folderPath, { withFileTypes: true })
+                    .filter(item =>
+                        !item.isDirectory() && item.name.endsWith(".md") && item.name.startsWith("0x")
+                    )
+                    .map(item => item.name)
+                    .sort()
+                    .last();
+                if (ffs) {
+                    const x = ffs.split("-").first();
+                    if (x) {
+                        sortOrder = '0x' +(+x + 1).toString(16).padStart(3, "0") + '-';
+                    }
+                }
+            }
             const path = app.vault.getAvailablePath(
-                normalizePath(`${folderPath ?? ""}/${filename || "Untitled"}`),
+                normalizePath(`${folderPath ?? ""}/${sortOrder}${filename || "Untitled"}`),
                 extension
             );
             const folder_path = get_folder_path_from_file_path(path);
@@ -194,7 +214,7 @@ export class Templater {
 
         app.workspace.trigger("templater:new-note-from-template", {
             file: created_note,
-            content: output_content,
+            content: output_content
         });
 
         if (open_new_note) {
@@ -204,7 +224,7 @@ export class Templater {
                 return;
             }
             await active_leaf.openFile(created_note, {
-                state: { mode: "source" },
+                state: { mode: "source" }
             });
 
             await this.plugin.editor_handler.jump_to_next_cursor_location(
@@ -213,7 +233,7 @@ export class Templater {
             );
 
             active_leaf.setEphemeralState({
-                rename: "all",
+                rename: "all"
             });
         }
 
@@ -222,6 +242,7 @@ export class Templater {
     }
 
     async append_template_to_active_file(template_file: TFile): Promise<void> {
+        debugger
         const active_view = app.workspace.getActiveViewOfType(MarkdownView);
         const active_editor = app.workspace.activeEditor;
         if (!active_editor || !active_editor.file || !active_editor.editor) {
@@ -260,7 +281,7 @@ export class Templater {
             editor: active_editor,
             content: output_content,
             oldSelections,
-            newSelections: doc.listSelections(),
+            newSelections: doc.listSelections()
         });
 
         await this.plugin.editor_handler.jump_to_next_cursor_location(
@@ -305,7 +326,7 @@ export class Templater {
         }
         app.workspace.trigger("templater:new-note-from-template", {
             file,
-            content: output_content,
+            content: output_content
         });
         await this.plugin.editor_handler.jump_to_next_cursor_location(
             file,
@@ -350,7 +371,7 @@ export class Templater {
         await app.vault.modify(file, output_content);
         app.workspace.trigger("templater:overwrite-file", {
             file,
-            content: output_content,
+            content: output_content
         });
         await this.plugin.editor_handler.jump_to_next_cursor_location(
             file,

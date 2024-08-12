@@ -1,13 +1,13 @@
 lockfileVersion: '6.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
 dependencies:
   '@codemirror/language':
     specifier: github:lishid/cm-language
-    version: github.com/lishid/cm-language/cc6a2cc30288db6be3f879ddf0e3ef64f14ed6ab
+    version: github.com/lishid/cm-language/2644bfc27afda707a7e1f3aedaf3ca7120f63cd9
   '@codemirror/state':
     specifier: ^6.1.2
     version: 6.4.0
@@ -3072,10 +3072,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/lishid/cm-language/cc6a2cc30288db6be3f879ddf0e3ef64f14ed6ab:
-    resolution: {tarball: https://codeload.github.com/lishid/cm-language/tar.gz/cc6a2cc30288db6be3f879ddf0e3ef64f14ed6ab}
+  github.com/lishid/cm-language/2644bfc27afda707a7e1f3aedaf3ca7120f63cd9:
+    resolution: {commit: 2644bfc27afda707a7e1f3aedaf3ca7120f63cd9, repo: git+ssh://git@github.com/lishid/cm-language.git, type: git}
     name: '@codemirror/language'
-    version: 6.9.2
+    version: 6.10.1
+    prepare: true
     requiresBuild: true
     dependencies:
       '@codemirror/state': 6.4.0
